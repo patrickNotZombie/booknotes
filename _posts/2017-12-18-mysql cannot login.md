@@ -4,7 +4,7 @@ title:      "MySQL登陆不了的问题"
 subtitle:   "root账号和新建用户的解决"
 date:       2017-12-18 12:00:00
 author:     "Patrick"
-header-img: "img/post-bg-alibaba.jpg"
+header-img: "img/mysql1025.jpg"
 catalog:    true
 tags:
     - MySQL
