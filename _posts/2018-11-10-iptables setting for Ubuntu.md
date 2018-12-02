@@ -60,7 +60,7 @@ tags:
 	
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT
-	iptables -I INPUT -s 202.38.254.230 -p tcp --dport 22 -j ACCEPT
+	iptables -I INPUT -s 202.38.254.0/24 -p tcp --dport 22 -j ACCEPT
 	#如果限制ip了就不需要下面的各种策略设置。
 	
 	#丢弃坏的TCP包
