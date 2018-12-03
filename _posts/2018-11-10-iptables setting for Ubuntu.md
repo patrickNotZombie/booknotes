@@ -89,3 +89,32 @@ tags:
 
 	iptables-save > /etc/iptables/rules.v4
 	ip6tables-save > /etc/iptables/rules.v6
+
+删除规则或者插入新的规则，先查看现有规则
+	
+	iptables -nL --line-number
+
+	root@box:/etc/iptables# iptables -nL --line-number
+	Chain INPUT (policy ACCEPT)
+	num  target     prot opt source               destination         
+	1    ACCEPT     tcp  --  202.38.254.230       0.0.0.0/0            tcp dpt:22
+	2    ACCEPT     all  --  202.38.254.0/24      0.0.0.0/0           
+	3    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+	4    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED
+	5    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            state NEW tcp dpt:80
+	6    ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            state NEW tcp dpt:443
+	7    DROP       all  --  0.0.0.0/0            0.0.0.0/0           
+	
+	Chain FORWARD (policy ACCEPT)
+	num  target     prot opt source               destination         
+	
+	Chain OUTPUT (policy ACCEPT)
+	num  target     prot opt source               destination
+
+插入一条规则到第三行
+
+	iptables -I INPUT 3 -s 202.38.254.0/24 -j ACCEPT
+
+删除第三行规则
+
+	 iptables -D INPUT 3
