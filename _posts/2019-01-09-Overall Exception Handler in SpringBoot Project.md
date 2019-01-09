@@ -19,95 +19,26 @@ tags:
 	 *
 	 */
 	@ControllerAdvice
-	public class OverallExceptionResolver {
-		@Autowired
-		private LogService logService;
-		 //记录数据库最大字符长度  
-	    private static final int WIRTE_DB_MAX_LENGTH = 50; 
-	    ActionMessage actionMessage = null;
-		
-		private static Log log = Log.getLog(OverallExceptionResolver.class);
-		
+	public class GlobalExceptionHandler {
+ 
+	    Logger log = LoggerFactory.getLogger(OverallExceptionResolver.class);
+	 
+	    @ExceptionHandler(value = IllegalArgumentException.class)
+	    @ResponseBody
+	    public ResponseEntity<String> parameterErrorHandler(HttpServletRequest req, IllegalArgumentException e) {
+	        return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+	    }
+	
+			
 	    @ExceptionHandler(value = Exception.class)
 		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	    public @ResponseBody String serviceCommonExceptionHandler(Exception exception) {
-	        //对捕获的异常进行处理并打印日志等，之后返回json数据，方式与Controller相同
-			Logger logger = LoggerFactory.getLogger("debug");
-	
-	    	
-			if (exception instanceof NotAuthorizedException) {
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_NOT_LOGIN, exception.getMessage());
-			} else if(exception instanceof UnauthenticatedException) {
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_NOT_LOGIN, "请登录后再进行操作！");
-			} else if (exception instanceof PermissionsException){
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_NO_PERMISSION, exception.getMessage());
-			} else if (exception instanceof GroupsException){
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_BAD_INPUT, exception.getMessage());
-			}else {
-				exception.printStackTrace();
-				actionMessage = new ActionMessage(ActionMessage.Type.WARN, 
-						ActionMessage.CODE_FORBIDDEN, exception.getMessage());
-				actionMessage.getDetail();
-				
-			}
-			
-			String exceptionMessage = actionMessage.getDetail();  
-	        if(exceptionMessage != null){  
-	            if(exceptionMessage.length() > WIRTE_DB_MAX_LENGTH){  
-	                exceptionMessage = exceptionMessage.substring(0,WIRTE_DB_MAX_LENGTH);  
-	            }  
-	        } 
-	        
-			if (!(exception instanceof NotAuthorizedException || exception instanceof UnauthenticatedException)) {
-				logService.addErrorLog(actionMessage.getType().name(), exceptionMessage);
-			}
-	        return "{\"type\":\"error\",\"success\":\"false\",\"code\":\"300\",\"detail\":\""+exception.getMessage()+"\"}";
-	    }
-	    @ExceptionHandler(value = NotAuthorizedException.class)
-		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	    public @ResponseBody String serviceAuthExceptionHandler(Exception exception) {
-	        //对捕获的异常进行处理并打印日志等，之后返回json数据，方式与Controller相同
-			Logger logger = LoggerFactory.getLogger("debug");
-	
-	    	
-			if (exception instanceof NotAuthorizedException) {
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_NOT_LOGIN, exception.getMessage());
-			} else if(exception instanceof UnauthenticatedException) {
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_NOT_LOGIN, "请登录后再进行操作！");
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_SYSTEM_STOPED, exception.getMessage());
-			} else if (exception instanceof PermissionsException){
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_NO_PERMISSION, exception.getMessage());
-			} else if (exception instanceof GroupsException){
-				actionMessage = new ActionMessage(ActionMessage.Type.ERROR,
-						ActionMessage.CODE_BAD_INPUT, exception.getMessage());
-			}else {
-				exception.printStackTrace();
-				actionMessage = new ActionMessage(ActionMessage.Type.WARN, 
-						ActionMessage.CODE_FORBIDDEN, exception.getMessage());
-				actionMessage.getDetail();
-				
-			}
-			
-			String exceptionMessage = actionMessage.getDetail();  
-	        if(exceptionMessage != null){  
-	            if(exceptionMessage.length() > WIRTE_DB_MAX_LENGTH){  
-	                exceptionMessage = exceptionMessage.substring(0,WIRTE_DB_MAX_LENGTH);  
-	            }  
-	        } 
-	        
-			if (!(exception instanceof NotAuthorizedException || exception instanceof UnauthenticatedException)) {
-				logService.addErrorLog(actionMessage.getType().name(), exceptionMessage);
-			}
-	        return "{\"type\":\"error\",\"success\":\"false\",\"code\":\"300\",\"detail\":"+exception.getMessage()+"\"}";
-	    }
-	
+		public @ResponseBody
+		String serviceCommonExceptionHandler(HttpServletRequest req, Exception exception) {
+			String url = req.getRequestURI();
+			log.error("request error at " + url, exception);
+			JSONObject json = new JSONObject();
+			json.put("detail", exception.getMessage());
+			json.put("code",500);
+			return json.toString();
+		}
 	}
-
